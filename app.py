@@ -5,16 +5,18 @@ from flask_mail import Mail, Message
 
 app = Flask(__name__)
 
-app.secret_key = 'your_secret_key'
+import os
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
+
 
 # Email configuration
 app.config['SEND_EMAILS'] = True
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'cloudreserve.co@gmail.com'
-app.config['MAIL_PASSWORD'] = 'aify oxly syhk uuji'
-app.config['MAIL_DEFAULT_SENDER'] = 'cloudreserve.co@gmail.com'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 
 mail = Mail(app)
 
