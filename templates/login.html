@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <title>Staff Login - CloudReserve</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            display: none;
+        }
+
+        main {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+        }
+
+        /* Left Section - Welcome (unchanged, keeps background image) */
+        .login-container {
+            width: 60%;
+            background: url('/static/login.png') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            position: relative;
+            color: white;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-container::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .welcome-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .welcome-icon img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .welcome-content h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .welcome-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        .welcome-footer {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .welcome-footer a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .welcome-footer a:hover {
+            opacity: 1;
+        }
+
+        /* ---------- RIGHT SECTION – FORM FITS WIDTH, HEADER SIMPLE & CENTERED ---------- */
+        .login-form {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;        /* reduced side padding -> form stretches */
+            background: #ffffff;
+            position: relative;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 480px;            /* wider to utilize space, but still elegant */
+            position: relative;
+            z-index: 2;
+        }
+
+        /* simple, centered heading – no left border, just text */
+        .form-container h2 {
+            color: #0B2A4A;
+            font-size: 32px;
+            margin-bottom: 40px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            text-align: center;           /* centered as requested */
+        }
+
+        /* form group */
+        .form-group {
+            margin-bottom: 26px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #1E3A8A;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 16px 20px;           /* slightly taller for comfort */
+            border: 1px solid #E0E9F5;
+            border-radius: 16px;           /* softer */
+            background: #F9FCFE;
+            font-size: 17px;
+            color: #1F3A5F;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(0,20,50,0.02);
+        }
+
+        .form-group input::placeholder {
+            color: #9BB5D4;
+            font-size: 16px;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3B5BDB;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(59, 91, 219, 0.15);
+            padding: 16px 20px;
+        }
+
+        /* button group – side by side, spacious */
+        .button-group {
+            display: flex;
+            gap: 18px;
+            margin-top: 42px;
+        }
+
+        .login-form form button,
+        .login-form .sign-in-link {
+            flex: 1;
+            padding: 16px 18px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;            /* pill shape */
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.3px;
+        }
+
+        .login-form form button {
+            background: linear-gradient(145deg, #2A4BB0, #173A7A);
+            color: white;
+            box-shadow: 0 8px 20px rgba(26, 67, 143, 0.25);
+            border: 2px solid transparent;
+        }
+
+        .login-form form button:hover {
+            background: linear-gradient(145deg, #1F3F9A, #102E62);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(26, 67, 143, 0.35);
+        }
+
+        .login-form .sign-in-link {
+            background: transparent;
+            color: #1E3A8A;
+            border: 2px solid #1E3A8A;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .login-form .sign-in-link:hover {
+            background: #EAF1FD;
+            border-color: #2A4BB0;
+            color: #0B2A4A;
+            transform: translateY(-2px);
+        }
+
+        .form-footer-note {
+            margin-top: 30px;
+            font-size: 15px;
+            color: #7C8FA5;
+            text-align: center;
+            border-top: 1px solid #E5EDF8;
+            padding-top: 24px;
+        }
+
+        .form-footer-note a {
+            color: #1E3A8A;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px dashed #A0B8D4;
+            margin: 0 5px;
+        }
+
+        .form-footer-note a:hover {
+            color: #102E62;
+            border-bottom: 1px solid #102E62;
+        }
+
+        /* SVG Wave Divider (kept intact) */
+        .wave-divider {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: auto;
+            z-index: 1;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin-top: 22px;
+        }
+
+        .flash-messages ul {
+            background: #FFF2F0;
+            padding: 14px 18px;
+            border-radius: 18px;
+            border-left: 6px solid #D14545;
+            list-style: none;
+            box-shadow: 0 4px 12px rgba(200,60,50,0.15);
+            font-size: 14px;
+        }
+
+        .flash-messages li {
+            color: #A13131;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flash-messages li::before {
+            content: '⚠️';
+            font-size: 16px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .login-container {
+                width: 55%;
+                padding: 40px 30px;
+            }
+
+            .login-form {
+                width: 45%;
+                padding: 40px 20px;
+            }
+
+            .form-container {
+                max-width: 400px;
+            }
+
+            .welcome-content {
+                max-width: 300px;
+            }
+
+            .welcome-content h1 {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+            }
+
+            .login-container {
+                width: 100%;
+                height: 40%;
+                padding: 30px 20px;
+                justify-content: flex-start;
+                padding-top: 50px;
+            }
+
+            .welcome-footer {
+                bottom: 20px;
+                gap: 20px;
+                font-size: 12px;
+            }
+
+            .login-form {
+                width: 100%;
+                height: 60%;
+                padding: 30px 20px;
+            }
+
+            .form-container {
+                max-width: 100%;
+            }
+
+            .form-container h2 {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .login-form form button,
+            .login-form .sign-in-link {
+                width: 100%;
+                padding: 16px;
+            }
+
+            .wave-divider {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Left Section (unchanged) -->
+        <div class="login-container">
+            <div class="welcome-content">
+                <div class="welcome-icon">
+                    <img src="/static/logo.png" alt="CloudReserve Logo">
+                </div>
+                <h1>Welcome to</h1>
+                <h2 style="font-size: 32px; margin-bottom: 20px;">CloudReserve</h2>
+                <p>Streamline your restaurant reservations with our powerful cloud-based management system. Effortlessly organize bookings, manage your staff, and deliver exceptional guest experiences.</p>
+            </div>
+
+            <div class="welcome-footer">
+                <a href="#">CREATOR HERE</a>
+                <a href="#">DESIGNER HERE</a>
+            </div>
+        </div>
+
+        <!-- SVG Wave Divider (unchanged) -->
+        <svg class="wave-divider" viewBox="0 0 100 1000" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1E3A8A;stop-opacity:0.1" />
+                    <stop offset="100%" style="stop-color:#3B5BDB;stop-opacity:0" />
+                </linearGradient>
+            </defs>
+            <path d="M0,100 Q25,200 50,100 T100,100 L100,0 Q75,-100 50,0 T0,0 Z" fill="url(#waveGradient)" opacity="0.3"/>
+            <path d="M0,300 Q25,400 50,300 T100,300 L100,150 Q75,50 50,150 T0,150 Z" fill="url(#waveGradient)" opacity="0.2"/>
+            <path d="M0,500 Q25,600 50,500 T100,500 L100,350 Q75,250 50,350 T0,350 Z" fill="url(#waveGradient)" opacity="0.15"/>
+            <path d="M0,700 Q25,800 50,700 T100,700 L100,550 Q75,450 50,550 T0,550 Z" fill="url(#waveGradient)" opacity="0.1"/>
+            <path d="M0,900 Q25,1000 50,900 T100,900 L100,750 Q75,650 50,750 T0,750 Z" fill="url(#waveGradient)" opacity="0.08"/>
+        </svg>
+
+        <!-- Right Section – form now fits width, heading centered, less side padding -->
+        <div class="login-form">
+            <div class="form-container">
+                <!-- simple centered header -->
+                <h2>Staff Login</h2>
+                
+                <form method="post" action="/login">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="e.g. john.doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="··········" required>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Login</button>
+                        <a href="#" class="sign-in-link" onclick="alert('Sign in flow'); return false;">Sign In</a>
+                    </div>
+                </form>
+
+                <div class="form-footer-note">
+                    <a href="#">Forgot password?</a> · <a href="#">Contact support</a>
+                </div>
+
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="flash-messages">
+                        <ul>
+                        {% for message in messages %}
+                          <li>{{ message }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                  {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

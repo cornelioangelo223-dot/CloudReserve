@@ -1,0 +1,536 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --blue-deep:   #1b3f72;
+    --blue-mid:    #2d5f9e;
+    --blue-bright: #3a7bd5;
+    --blue-light:  #d6e8fb;
+    --blue-pale:   #eef5fd;
+    --white:       #ffffff;
+    --text-dark:   #1a2a3a;
+    --text-muted:  #5a7190;
+    --border:      #c8ddf5;
+    --danger:      #e05252;
+    --radius-sm:   8px;
+    --radius-md:   14px;
+    --radius-lg:   22px;
+    --radius-pill: 999px;
+    --shadow-card:  0 4px 24px rgba(27, 63, 114, 0.10);
+    --shadow-hover: 0 8px 32px rgba(27, 63, 114, 0.18);
+    --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--blue-pale);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+header {
+    background: var(--blue-deep);
+    padding: 0;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 12px rgba(27, 63, 114, 0.25);
+}
+
+header h1 {
+    color: var(--white);
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 18px 24px;
+}
+
+header h1::before,
+header h1::after {
+    content: none;
+}
+
+/* ══════════════════════════════
+   NAV
+══════════════════════════════ */
+nav {
+    background: var(--white);
+    padding: 10px 24px;
+    text-align: center;
+    border-bottom: 2px solid var(--blue-light);
+    box-shadow: 0 2px 8px rgba(27, 63, 114, 0.07);
+    backdrop-filter: none;
+}
+
+nav a {
+    color: var(--text-dark);
+    text-decoration: none;
+    margin: 0 6px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 20px;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid transparent;
+    transition: all 0.2s ease;
+    display: inline-block;
+    background: none;
+}
+
+nav a:hover {
+    color: var(--white);
+    background: var(--blue-deep);
+    border-color: var(--blue-deep);
+    text-decoration: none;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ══════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════ */
+.flex-container {
+    display: flex;
+    gap: 24px;
+    justify-content: stretch;
+    align-items: flex-start;
+    margin: 36px auto;
+    width: 94%;
+    max-width: 1500px;
+    min-height: 600px;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+}
+
+/* ══════════════════════════════
+   CALENDAR SECTION
+══════════════════════════════ */
+.calendar-section.large-calendar {
+    flex: 0 0 44%;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 30px 26px;
+    border: 1.5px solid var(--border);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.calendar-section.large-calendar:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.calendar-section h3 {
+    color: var(--blue-deep);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2.5px solid var(--blue-light);
+    display: block;
+    position: static;
+}
+
+.calendar-section h3::after {
+    content: none;
+    display: none;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 5px;
+    margin-top: 12px;
+    font-size: 14px;
+    background: transparent;
+    border-radius: 0;
+}
+
+.calendar-table th {
+    padding: 12px 4px;
+    text-align: center;
+    background: var(--blue-deep);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.3px;
+    box-shadow: none;
+}
+
+.calendar-table td {
+    padding: 10px 4px;
+    text-align: center;
+    background: var(--blue-pale);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    transition: all 0.18s ease;
+    vertical-align: top;
+    min-height: 72px;
+    box-shadow: none;
+}
+
+.calendar-table td:hover:not(:empty) {
+    background: var(--white);
+    border-color: var(--blue-bright);
+    box-shadow: 0 4px 12px rgba(58, 123, 213, 0.15);
+    transform: none;
+    position: relative;
+    z-index: 5;
+}
+
+.calendar-table td.booked-day {
+    background: #fff0f0;
+    border: 1.5px solid #f5c0c0;
+}
+
+.calendar-table td.booked-day:hover {
+    background: #ffe4e4;
+    border-color: var(--danger);
+}
+
+.calendar-table td > div {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 5px;
+    color: var(--blue-deep);
+}
+
+.calendar-times {
+    list-style: none;
+    padding: 0 2px;
+    margin: 0;
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+.calendar-times li {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    margin-bottom: 3px;
+    padding: 3px 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    transition: background 0.15s;
+}
+
+.calendar-times li:hover {
+    background: var(--blue-light);
+    transform: none;
+}
+
+.calendar-time {
+    font-weight: 700;
+    color: var(--blue-bright);
+    background: var(--blue-pale);
+    padding: 2px 6px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+}
+
+.calendar-guest {
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    font-size: 10px;
+}
+
+/* ══════════════════════════════
+   EDIT SECTION
+══════════════════════════════ */
+.edit-section {
+    flex: 0 0 56%;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 32px 32px;
+    border: 1.5px solid var(--border);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.edit-section:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.edit-section h2 {
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 26px;
+    font-size: 22px;
+    font-weight: 700;
+    background: var(--blue-deep);
+    padding: 13px 28px;
+    border-radius: var(--radius-pill);
+    display: block;
+    width: 100%;
+    letter-spacing: 0.3px;
+    box-shadow: none;
+    border: none;
+}
+
+.edit-section h3 {
+    color: var(--blue-deep);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 22px 0 14px 0;
+    padding-bottom: 8px;
+    border-bottom: 2.5px solid var(--blue-light);
+    display: block;
+    position: static;
+}
+
+.edit-section h3::after {
+    content: none;
+    display: none;
+}
+
+/* Search form */
+.edit-section > form:first-of-type {
+    background: var(--blue-pale);
+    padding: 22px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 22px;
+    border: 1.5px solid var(--border);
+    box-shadow: none;
+}
+
+.edit-section > form:first-of-type label {
+    color: var(--blue-deep);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.edit-section > form:first-of-type input {
+    width: 100%;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: var(--font);
+    margin-bottom: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    color: var(--text-dark);
+}
+
+.edit-section > form:first-of-type input:focus {
+    border-color: var(--blue-bright);
+    box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.15);
+    outline: none;
+}
+
+.edit-section > form:first-of-type button {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+    font-family: var(--font);
+    font-weight: 700;
+    background: var(--blue-deep);
+    border: none;
+    border-radius: var(--radius-pill);
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.edit-section > form:first-of-type button:hover {
+    background: var(--blue-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(27, 63, 114, 0.25);
+}
+
+/* Edit reservation form */
+.edit-section form[action="/edit_reservation"] {
+    background: var(--blue-pale);
+    padding: 26px;
+    border-radius: var(--radius-lg);
+    margin: 18px 0;
+    border: 1.5px solid var(--border);
+    box-shadow: none;
+}
+
+.edit-section form[action="/edit_reservation"] label {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 14px 0 5px 0;
+    display: block;
+}
+
+.edit-section form[action="/edit_reservation"] input {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 11px 15px;
+    width: 100%;
+    font-size: 14px;
+    font-family: var(--font);
+    color: var(--text-dark);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 2px;
+}
+
+.edit-section form[action="/edit_reservation"] input:focus {
+    border-color: var(--blue-bright);
+    box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.15);
+    outline: none;
+}
+
+.edit-section form[action="/edit_reservation"] button {
+    background: var(--blue-deep);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 13px 36px;
+    font-size: 15px;
+    font-family: var(--font);
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.3px;
+    width: auto;
+    min-width: 180px;
+    display: inline-block;
+}
+
+.edit-section form[action="/edit_reservation"] button:hover {
+    background: var(--blue-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(27, 63, 114, 0.25);
+}
+
+/* ══════════════════════════════
+   BOOKINGS TABLE
+══════════════════════════════ */
+.bookings-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    margin-top: 16px;
+    background: transparent;
+}
+
+.bookings-table th {
+    background: var(--blue-deep);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 14px 12px;
+    text-align: center;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+.bookings-table th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.bookings-table th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+.bookings-table td {
+    padding: 13px 12px;
+    text-align: center;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dark);
+    transition: background 0.15s;
+}
+
+.bookings-table td:first-child {
+    border-left: 1px solid var(--border);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.bookings-table td:last-child {
+    border-right: 1px solid var(--border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.bookings-table tr:hover td {
+    background: var(--blue-pale);
+    transform: none;
+    box-shadow: none;
+}
+
+.bookings-table td[colspan="5"] {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-style: italic;
+    background: var(--blue-pale);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+/* ══════════════════════════════
+   ERROR MESSAGE
+══════════════════════════════ */
+p[style="color:red;"] {
+    background: #fff0f0 !important;
+    color: var(--danger) !important;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    margin: 16px 0;
+    border-left: 4px solid var(--danger);
+    font-weight: 600;
+    font-size: 14px;
+    backdrop-filter: none;
+}
+
+/* ══════════════════════════════
+   SCROLLBAR
+══════════════════════════════ */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--blue-pale); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--blue-mid); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue-deep); }
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 1200px) {
+    .flex-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .calendar-section.large-calendar,
+    .edit-section {
+        flex: 0 0 100%;
+        width: 100%;
+    }
+    .calendar-table { font-size: 13px; }
+}
+
+@media (max-width: 768px) {
+    .flex-container { width: 97%; margin: 20px auto; }
+    .calendar-section.large-calendar,
+    .edit-section { padding: 20px 16px; }
+    .calendar-table td { padding: 7px 2px; }
+    .calendar-times li { flex-direction: column; gap: 2px; }
+    .bookings-table { font-size: 12px; }
+    .bookings-table th,
+    .bookings-table td { padding: 10px 6px; }
+}

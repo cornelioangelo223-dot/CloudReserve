@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View/Edit Reservation - CloudReserve</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* ── Header ── */
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 16px 24px;
+        }
+        .header-logo  { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+        .header-title { color: var(--white); font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+
+        nav a.active { color: var(--white); background: var(--blue-deep); border-color: var(--blue-deep); }
+
+        /* ── Search box ── */
+        .search-box {
+            background: var(--blue-pale);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box.collapsed {
+            padding: 14px 22px;
+        }
+
+        .search-box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .search-box-header label {
+            color: var(--text-muted) !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            margin: 0 !important;
+        }
+
+        .search-clear-btn {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-pill);
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font);
+            padding: 4px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .search-clear-btn:hover {
+            background: var(--white);
+            color: var(--blue-deep);
+            border-color: var(--blue-bright);
+        }
+
+        .search-input-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+            max-height: 60px;
+            transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .search-input-row.hidden {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .search-input-row input {
+            flex: 1;
+            padding: 11px 16px !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius-md) !important;
+            font-size: 14px !important;
+            background: var(--white) !important;
+            color: var(--text-dark) !important;
+            font-family: var(--font) !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+            outline: none !important;
+            margin: 0 !important;
+        }
+
+        .search-input-row input:focus {
+            border-color: var(--blue-bright) !important;
+            box-shadow: 0 0 0 3px rgba(58,123,213,0.15) !important;
+        }
+
+        .search-input-row button {
+            padding: 11px 24px !important;
+            background: var(--blue-deep) !important;
+            color: var(--white) !important;
+            border: none !important;
+            border-radius: var(--radius-pill) !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            font-family: var(--font) !important;
+            cursor: pointer !important;
+            transition: background 0.2s, transform 0.15s !important;
+            white-space: nowrap;
+        }
+
+        .search-input-row button:hover {
+            background: var(--blue-mid) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* ── Search result summary chip ── */
+        .search-result-chip {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--blue-deep);
+            font-weight: 600;
+        }
+
+        .search-result-chip.show { display: flex; }
+
+        .search-result-chip span {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            padding: 3px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── Error card ── */
+        .search-error {
+            background: #fff0f0;
+            color: var(--danger);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin: 12px 0 0;
+            border: 1px solid #f5c0c0;
+            border-left: 4px solid var(--danger);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-error::before { content: '⚠'; font-size: 16px; flex-shrink: 0; }
+
+        /* ── Guest banner ── */
+        .guest-banner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--blue-deep);
+            color: var(--white);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+
+        .guest-banner-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .guest-banner-name { font-size: 16px; font-weight: 700; }
+        .guest-banner-sub  { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+        /* ── Calendar nav ── */
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 8px;
+        }
+
+        .calendar-nav-title { color: var(--blue-deep); font-size: 18px; font-weight: 700; flex: 1; text-align: center; }
+
+        .cal-nav-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--blue-deep);
+            font-size: 16px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none;
+            transition: background 0.15s, border-color 0.15s, transform 0.15s;
+            flex-shrink: 0; line-height: 1;
+        }
+
+        .cal-nav-btn:hover {
+            background: var(--blue-deep); color: var(--white);
+            border-color: var(--blue-deep); transform: scale(1.08);
+            text-decoration: none;
+        }
+
+        /* ── Clickable calendar days ── */
+        .calendar-table td.has-bookings { cursor: pointer; }
+        .calendar-table td.has-bookings:hover { background: var(--white); border-color: var(--blue-bright); box-shadow: 0 4px 12px rgba(58,123,213,0.15); }
+
+        .calendar-table td.day-selected { background: var(--blue-deep) !important; border-color: var(--blue-deep) !important; box-shadow: 0 4px 14px rgba(27,63,114,0.3) !important; }
+        .calendar-table td.day-selected > div { color: var(--white) !important; }
+        .calendar-table td.day-selected .calendar-time { background: rgba(255,255,255,0.2); color: var(--white); }
+        .calendar-table td.day-selected .calendar-guest { color: rgba(255,255,255,0.85); }
+        .calendar-table td.day-selected .calendar-times li { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+
+        /* ── Day detail panel ── */
+        .day-detail-panel {
+            display: none;
+            margin-top: 16px;
+            background: var(--blue-pale);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            animation: panelFadeIn 0.25s ease both;
+        }
+
+        .day-detail-panel.show { display: block; }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .day-detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .day-detail-title  { font-size: 14px; font-weight: 700; color: var(--blue-deep); }
+
+        .day-detail-close {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px;
+            transition: color 0.15s;
+        }
+
+        .day-detail-close:hover { color: var(--blue-deep); }
+
+        .day-slot-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+        .day-slot-item {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 10px 14px; font-size: 13px;
+        }
+
+        .day-slot-time  { font-weight: 700; color: var(--blue-bright); background: var(--blue-pale); padding: 3px 10px; border-radius: var(--radius-pill); font-size: 12px; flex-shrink: 0; }
+        .day-slot-name  { font-weight: 600; color: var(--text-dark); flex: 1; }
+        .day-slot-group { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+        .day-no-bookings { font-size: 13px; color: var(--text-muted); font-style: italic; text-align: center; padding: 8px 0; }
+
+        /* ── Bookings section ── */
+        .bookings-always-section {
+            width: 94%;
+            max-width: 1500px;
+            margin: 0 auto 40px;
+        }
+
+        .bookings-always-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1.5px solid var(--border);
+            padding: 28px 32px;
+        }
+
+        .bookings-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2.5px solid var(--blue-light);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .bookings-card-header h3 {
+            color: var(--blue-deep);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Status filter tabs ── */
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--text-muted);
+            transition: all 0.18s ease;
+            letter-spacing: 0.2px;
+        }
+
+        .filter-tab:hover { border-color: var(--blue-bright); color: var(--blue-deep); }
+
+        .filter-tab.active {
+            background: var(--blue-deep);
+            color: var(--white);
+            border-color: var(--blue-deep);
+        }
+
+        .filter-tab[data-filter="confirmed"].active { background: #1a7f4b; border-color: #1a7f4b; }
+        .filter-tab[data-filter="queued"].active    { background: var(--blue-mid); border-color: var(--blue-mid); }
+        .filter-tab[data-filter="pending"].active   { background: #b06000; border-color: #b06000; }
+        .filter-tab[data-filter="cancelled"].active { background: var(--danger); border-color: var(--danger); }
+
+        /* Count pill on tab */
+        .tab-count {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            border-radius: 999px;
+            padding: 0 6px;
+            font-size: 11px;
+            margin-left: 4px;
+            font-weight: 700;
+        }
+
+        .filter-tab:not(.active) .tab-count {
+            background: var(--blue-pale);
+            color: var(--text-muted);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+            display: block;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--blue-deep);
+            margin-bottom: 8px;
+        }
+
+        .empty-state-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ── Status badges ── */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+        .badge-confirmed { background: #e6f4ec; color: #1a7f4b; }
+        .badge-pending   { background: #fff5e0; color: #b06000; }
+        .badge-queued    { background: var(--blue-pale); color: var(--blue-deep); }
+        .badge-cancelled { background: #fff0f0; color: var(--danger); }
+
+        /* ── Delete button ── */
+        .btn-delete {
+            padding: 5px 14px;
+            background: #fff0f0; color: var(--danger);
+            border: 1px solid #f5c0c0; border-radius: var(--radius-pill);
+            font-size: 12px; font-weight: 700; font-family: var(--font);
+            cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-delete:hover { background: var(--danger); color: var(--white); border-color: var(--danger); transform: translateY(-1px); }
+
+        /* ── Row highlight from calendar click ── */
+        .bookings-table tr.row-highlight td { background: #eef5fd; border-top-color: var(--blue-bright); border-bottom-color: var(--blue-bright); }
+        .bookings-table tr.row-highlight td:first-child { border-left-color: var(--blue-bright); }
+        .bookings-table tr.row-highlight td:last-child  { border-right-color: var(--blue-bright); }
+
+        /* Hidden table row */
+        .bookings-table tr.row-hidden { display: none; }
+
+        /* ── Modals ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(27,63,114,0.35); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: var(--white); border-radius: var(--radius-lg);
+            padding: 36px 40px; text-align: center;
+            box-shadow: var(--shadow-hover); border: 1.5px solid var(--border);
+            max-width: 380px; width: 92%;
+            animation: popIn 0.25s ease both;
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+        .modal-icon { font-size: 40px; margin-bottom: 14px; }
+
+        .modal-box h3 { color: var(--blue-deep); font-size: 20px; font-weight: 700; margin: 0 0 8px; border: none; padding: 0; }
+        .modal-box h3::after { content: none; }
+        .modal-box p  { color: var(--text-muted); font-size: 14px; margin: 0 0 24px; background: none; border: none; padding: 0; }
+
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+
+        .btn-cancel-modal {
+            padding: 11px 28px; background: var(--white); color: var(--text-dark);
+            border: 1.5px solid var(--border); border-radius: var(--radius-pill);
+            font-size: 14px; font-weight: 700; font-family: var(--font);
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn-cancel-modal:hover { background: var(--blue-pale); border-color: var(--blue-bright); }
+
+        .btn-confirm-modal {
+            padding: 11px 28px; background: var(--blue-deep); color: var(--white);
+            border: none; border-radius: var(--radius-pill);
+            font-size: 14px; font-weight: 700; font-family: var(--font);
+            cursor: pointer; transition: background 0.15s, transform 0.15s;
+            text-decoration: none; display: inline-block;
+        }
+
+        .btn-confirm-modal:hover { background: var(--blue-mid); transform: translateY(-1px); }
+        .btn-confirm-danger { background: var(--danger); }
+        .btn-confirm-danger:hover { background: #c03030; }
+
+        @media (max-width: 768px) {
+            .modal-buttons { flex-direction: column; }
+            .guest-banner  { flex-direction: column; text-align: center; gap: 10px; }
+            .bookings-always-card { padding: 20px 16px; }
+            .bookings-card-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logout modal -->
+    <div class="modal-overlay" id="logoutOverlay">
+        <div class="modal-box">
+            <div class="modal-icon">👋</div>
+            <h3>Logging out?</h3>
+            <p>You'll need to sign back in to access the system.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel-modal" onclick="closeModal('logoutOverlay')">Stay</button>
+                <a href="/logout" class="btn-confirm-modal">Yes, Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update modal -->
+    <div class="modal-overlay" id="updateOverlay">
+        <div class="modal-box">
+            <div class="modal-icon">✏️</div>
+            <h3>Save changes?</h3>
+            <p>You're about to update this reservation. This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel-modal" onclick="closeModal('updateOverlay')">Cancel</button>
+                <button class="btn-confirm-modal" id="updateConfirmBtn">Yes, Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete modal -->
+    <div class="modal-overlay" id="deleteOverlay">
+        <div class="modal-box">
+            <div class="modal-icon">🗑️</div>
+            <h3>Cancel reservation?</h3>
+            <p id="deleteModalText">This will permanently remove the booking. Are you sure?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel-modal" onclick="closeModal('deleteOverlay')">Keep it</button>
+                <button class="btn-confirm-modal btn-confirm-danger" id="deleteConfirmBtn">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <form id="deleteForm" method="post" action="/delete_reservation" style="display:none;">
+        <input type="hidden" name="id" id="deleteId">
+    </form>
+
+    <header>
+        <div class="header-inner">
+            <img src="/static/logo.png" alt="CloudReserve Logo" class="header-logo">
+            <span class="header-title">CloudReserve</span>
+        </div>
+    </header>
+    <nav>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/reserve">Book Reservation</a>
+        <a href="/view_edit" class="active">View / Edit</a>
+        <a href="#" onclick="event.preventDefault(); openModal('logoutOverlay')">Logout</a>
+    </nav>
+
+    <main>
+        <div class="flex-container">
+
+            <!-- ── Calendar ── -->
+            <section class="calendar-section large-calendar">
+                <div class="calendar-nav">
+                    <a class="cal-nav-btn" href="/view_edit?month={{ prev_month }}&amp;year={{ prev_year }}" title="Previous month">&#8592;</a>
+                    <span class="calendar-nav-title">{{ month_name }} {{ year }}</span>
+                    <a class="cal-nav-btn" href="/view_edit?month={{ next_month }}&amp;year={{ next_year }}" title="Next month">&#8594;</a>
+                </div>
+                <table class="calendar-table">
+                    <thead>
+                        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar %}
+                            <tr>
+                            {% for day in week %}
+                                {% if day %}
+                                    <td class="{% if day.bookings|length > 0 %}booked-day has-bookings{% endif %}"
+                                        {% if day.bookings|length > 0 %}
+                                            onclick="selectDay(this, '{{ day.date }}', {{ day.bookings | tojson | safe }})"
+                                        {% endif %}>
+                                        <div>{{ day.day }}</div>
+                                        {% if day.bookings|length > 0 %}
+                                            <ul class="calendar-times">
+                                            {% for b in day.bookings %}
+                                                <li>
+                                                    <span class="calendar-time">{{ b.time }}</span>
+                                                    <span class="calendar-guest">{{ b.guest_name }}</span>
+                                                </li>
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                            {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Day detail panel -->
+                <div class="day-detail-panel" id="dayDetailPanel">
+                    <div class="day-detail-header">
+                        <span class="day-detail-title" id="dayDetailTitle">Bookings</span>
+                        <button class="day-detail-close" onclick="clearDaySelection()" title="Close">&#x2715;</button>
+                    </div>
+                    <ul class="day-slot-list" id="daySlotList"></ul>
+                </div>
+            </section>
+
+            <!-- ── Search & Edit ── -->
+            <section class="edit-section">
+                <h2>View / Edit Reservation</h2>
+
+                <!-- Collapsible search box -->
+                <div class="search-box" id="searchBox">
+                    <div class="search-box-header">
+                        <label for="guest_name_input">Search Guest</label>
+                        {% if reservation %}
+                        <button class="search-clear-btn" onclick="clearSearch()">✕ Clear &amp; search again</button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Result chip when collapsed -->
+                    {% if reservation %}
+                    <div class="search-result-chip show">
+                        Showing results for
+                        <span>{{ request.form.guest_name }}</span>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="/view_edit" id="searchForm">
+                        <div class="search-input-row {% if reservation %}hidden{% endif %}" id="searchInputRow">
+                            <input type="text" id="guest_name_input" name="guest_name"
+                                   placeholder="e.g. John Smith" required
+                                   value="{{ request.form.guest_name if request.form.guest_name and not reservation else '' }}">
+                            <button type="submit">Search</button>
+                        </div>
+                    </form>
+
+                    {% if error %}
+                        <div class="search-error">{{ error }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Empty state — no search yet -->
+                {% if not reservation and not error %}
+                <div class="empty-state">
+                    <span class="empty-state-icon">🔍</span>
+                    <div class="empty-state-title">Search for a reservation</div>
+                    <div class="empty-state-sub">Enter a guest name above to view or edit their booking details.</div>
+                </div>
+                {% endif %}
+
+                <!-- Reservation edit form -->
+                {% if reservation %}
+                    <h3>Reservation Details</h3>
+                    <div class="guest-banner">
+                        <div class="guest-banner-avatar">
+                            {{ reservation.guest_name[0] | upper if reservation.guest_name else '?' }}
+                        </div>
+                        <div>
+                            <div class="guest-banner-name">{{ reservation.guest_name }}</div>
+                            <div class="guest-banner-sub">Editing reservation #{{ reservation.id }}</div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="/edit_reservation" id="editForm">
+                        <input type="hidden" name="id" value="{{ reservation.id }}">
+
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ reservation.email }}" required>
+
+                        <label for="contact">Contact</label>
+                        <input type="text" id="contact" name="contact" value="{{ reservation.contact }}">
+
+                        <label for="date">Date</label>
+                        <input type="date" id="date" name="date" value="{{ reservation.date }}" required>
+
+                        <label for="time">Time</label>
+                        <input type="time" id="time" name="time" value="{{ reservation.time }}" required>
+
+                        <label for="group_size">Group Size</label>
+                        <input type="number" id="group_size" name="group_size"
+                               value="{{ reservation.group_size }}" min="1" required>
+
+                        <button type="button" onclick="openModal('updateOverlay')">Update Reservation</button>
+                    </form>
+                {% endif %}
+            </section>
+
+        </div>
+
+        <!-- ── Always-visible bookings table ── -->
+        <div class="bookings-always-section">
+            <div class="bookings-always-card">
+                <div class="bookings-card-header">
+                    <h3>📋 All Booked Days and Times</h3>
+                    <!-- Status filter tabs -->
+                    <div class="filter-tabs" id="filterTabs">
+                        <button class="filter-tab active" data-filter="all"
+                            onclick="filterTable('all')">
+                            All <span class="tab-count" id="count-all">0</span>
+                        </button>
+                        <button class="filter-tab" data-filter="confirmed"
+                            onclick="filterTable('confirmed')">
+                            Confirmed <span class="tab-count" id="count-confirmed">0</span>
+                        </button>
+                        <button class="filter-tab" data-filter="queued"
+                            onclick="filterTable('queued')">
+                            Queued <span class="tab-count" id="count-queued">0</span>
+                        </button>
+                        <button class="filter-tab" data-filter="pending"
+                            onclick="filterTable('pending')">
+                            Pending <span class="tab-count" id="count-pending">0</span>
+                        </button>
+                        <button class="filter-tab" data-filter="cancelled"
+                            onclick="filterTable('cancelled')">
+                            Cancelled <span class="tab-count" id="count-cancelled">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <table class="bookings-table" id="allBookingsTable">
+                    <thead>
+                        <tr>
+                            <th>Schedule</th>
+                            <th>Guest Name</th>
+                            <th>Group Size</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if all_reservations and all_reservations|length > 0 %}
+                            {% for r in all_reservations %}
+                            <tr data-date="{{ r.date }}" data-status="{{ r.status | lower }}">
+                                <td>
+                                    <div style="font-weight:700; color:var(--blue-deep); font-size:14px;"
+                                         data-rawdate="{{ r.date }}">{{ r.date }}</div>
+                                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">{{ r.time }}</div>
+                                </td>
+                                <td>{{ r.guest_name }}</td>
+                                <td>{{ r.group_size }}</td>
+                                <td>
+                                    {% if r.status == 'confirmed' %}
+                                        <span class="badge badge-confirmed">Confirmed</span>
+                                    {% elif r.status == 'queued' %}
+                                        <span class="badge badge-queued">Queued</span>
+                                    {% elif r.status == 'cancelled' %}
+                                        <span class="badge badge-cancelled">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge badge-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn-delete"
+                                        onclick="confirmDelete('{{ r.id }}', '{{ r.guest_name }}')">
+                                        Cancel
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="noDataRow">
+                                <td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted); font-style:italic;">
+                                    No bookings found.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <!-- Empty state for filtered view -->
+                <div class="empty-state" id="filterEmptyState" style="display:none;">
+                    <span class="empty-state-icon">📭</span>
+                    <div class="empty-state-title">No bookings in this category</div>
+                    <div class="empty-state-sub">Try selecting a different filter above.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ── Modal helpers ── */
+        function openModal(id)  { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+        document.querySelectorAll('.modal-overlay').forEach(function (o) {
+            o.addEventListener('click', function (e) { if (e.target === this) closeModal(this.id); });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(function (el) { el.classList.remove('show'); });
+        });
+
+        /* ── Update confirmation ── */
+        var updateBtn = document.getElementById('updateConfirmBtn');
+        if (updateBtn) {
+            updateBtn.addEventListener('click', function () {
+                closeModal('updateOverlay');
+                document.getElementById('editForm').submit();
+            });
+        }
+
+        /* ── Delete confirmation ── */
+        function confirmDelete(id, name) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteModalText').textContent =
+                'This will permanently cancel the booking for ' + name + '. Are you sure?';
+            openModal('deleteOverlay');
+        }
+
+        document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
+            closeModal('deleteOverlay');
+            document.getElementById('deleteForm').submit();
+        });
+
+        /* ── Search collapse / clear ── */
+        function clearSearch() {
+            window.location.href = '/view_edit';
+        }
+
+        /* ── Friendly date formatting ── */
+        function formatDate(raw) {
+            if (!raw || raw.length < 8) return raw;
+            var d = new Date(raw + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Format all raw dates in the table
+            document.querySelectorAll('[data-rawdate]').forEach(function (el) {
+                el.textContent = formatDate(el.getAttribute('data-rawdate'));
+            });
+
+            // Build tab counts
+            var counts = { all: 0, confirmed: 0, queued: 0, pending: 0, cancelled: 0 };
+            document.querySelectorAll('#allBookingsTable tbody tr[data-status]').forEach(function (row) {
+                var s = row.getAttribute('data-status');
+                counts.all++;
+                if (counts[s] !== undefined) counts[s]++;
+            });
+
+            Object.keys(counts).forEach(function (k) {
+                var el = document.getElementById('count-' + k);
+                if (el) el.textContent = counts[k];
+            });
+        });
+
+        /* ── Status filter tabs ── */
+        var currentFilter = 'all';
+
+        function filterTable(status) {
+            currentFilter = status;
+
+            // Update tab active state
+            document.querySelectorAll('.filter-tab').forEach(function (tab) {
+                tab.classList.toggle('active', tab.getAttribute('data-filter') === status);
+            });
+
+            var rows = document.querySelectorAll('#allBookingsTable tbody tr[data-status]');
+            var visible = 0;
+
+            rows.forEach(function (row) {
+                var match = (status === 'all') || (row.getAttribute('data-status') === status);
+                row.classList.toggle('row-hidden', !match);
+                if (match) visible++;
+            });
+
+            document.getElementById('filterEmptyState').style.display = (visible === 0) ? 'block' : 'none';
+        }
+
+        /* ── Calendar day click ── */
+        var selectedDayCell = null;
+
+        function selectDay(cell, dateStr, bookings) {
+            if (selectedDayCell && selectedDayCell !== cell) selectedDayCell.classList.remove('day-selected');
+            if (selectedDayCell === cell) { clearDaySelection(); return; }
+
+            selectedDayCell = cell;
+            cell.classList.add('day-selected');
+
+            var panel = document.getElementById('dayDetailPanel');
+            var title = document.getElementById('dayDetailTitle');
+            var list  = document.getElementById('daySlotList');
+
+            title.textContent = formatDate(dateStr);
+            list.innerHTML = '';
+
+            if (!bookings || bookings.length === 0) {
+                list.innerHTML = '<li class="day-no-bookings">No bookings for this day.</li>';
+            } else {
+                bookings.forEach(function (b) {
+                    var li = document.createElement('li');
+                    li.className = 'day-slot-item';
+                    li.innerHTML =
+                        '<span class="day-slot-time">' + b.time + '</span>' +
+                        '<span class="day-slot-name">' + b.guest_name + '</span>' +
+                        '<span class="day-slot-group">👥 ' + b.group_size + '</span>';
+                    list.appendChild(li);
+                });
+            }
+
+            panel.classList.add('show');
+            highlightTableRows(dateStr);
+        }
+
+        function clearDaySelection() {
+            if (selectedDayCell) { selectedDayCell.classList.remove('day-selected'); selectedDayCell = null; }
+            document.getElementById('dayDetailPanel').classList.remove('show');
+            document.getElementById('daySlotList').innerHTML = '';
+            highlightTableRows(null);
+        }
+
+        function highlightTableRows(dateStr) {
+            document.querySelectorAll('#allBookingsTable tbody tr').forEach(function (row) {
+                if (dateStr && row.dataset.date === dateStr) row.classList.add('row-highlight');
+                else row.classList.remove('row-highlight');
+            });
+
+            if (dateStr) {
+                var first = document.querySelector('#allBookingsTable tbody tr[data-date="' + dateStr + '"]');
+                if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
+</body>
+</html>

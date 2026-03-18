@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudReserve Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 960px;
+            margin: 40px auto;
+            padding: 0 20px 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Header with logo ── */
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 16px 24px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            color: var(--white);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Active nav link ── */
+        nav a.active {
+            color: var(--white);
+            background: var(--blue-deep);
+            border-color: var(--blue-deep);
+        }
+
+        /* ── Logo card ── */
+        .logo-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 32px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 24px;
+            animation: slideDown 0.45s ease both;
+        }
+
+        .logo-card-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo-card img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .logo-card-text h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--blue-deep);
+            margin: 0 0 4px;
+        }
+
+        .logo-card-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* ── Live date/time ── */
+        .live-datetime {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .live-time {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--blue-deep);
+            line-height: 1;
+            letter-spacing: 0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .live-date {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ── Stats Section ── */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.5s ease both;
+            animation-delay: 0.1s;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 22px 20px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        }
+
+        .stat-card.blue::before  { background: var(--blue-deep); }
+        .stat-card.green::before { background: #1a7f4b; }
+        .stat-card.amber::before { background: #b06000; }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon { font-size: 26px; margin-bottom: 10px; display: block; }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-card.blue  .stat-number { color: var(--blue-deep); }
+        .stat-card.green .stat-number { color: #1a7f4b; }
+        .stat-card.amber .stat-number { color: #b06000; }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        /* ── Two-column lower section ── */
+        .dashboard-lower {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            animation: fadeInUp 0.55s ease both;
+            animation-delay: 0.2s;
+        }
+
+        /* ── Menu Cards ── */
+        .menu-item {
+            background: var(--white);
+            padding: 32px 24px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-card);
+            border: 1.5px solid var(--border);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: var(--blue-deep);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .menu-item:hover::before { transform: scaleX(1); }
+
+        .menu-item:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--blue-light);
+        }
+
+        .menu-icon {
+            font-size: 46px;
+            margin-bottom: 14px;
+            display: block;
+            transition: transform 0.25s ease;
+        }
+
+        .menu-item:hover .menu-icon { transform: scale(1.08); }
+
+        .menu-item h3 {
+            color: var(--blue-deep);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            border: none;
+            padding: 0;
+            position: static;
+            display: block;
+        }
+
+        .menu-item h3::after {
+            content: '';
+            display: block;
+            width: 36px;
+            height: 3px;
+            background: var(--blue-light);
+            border-radius: var(--radius-pill);
+            margin: 8px auto 0;
+            transition: width 0.25s ease, background 0.25s ease;
+        }
+
+        .menu-item:hover h3::after { width: 64px; background: var(--blue-bright); }
+
+        .menu-item p {
+            color: var(--text-muted);
+            margin: 12px 0 20px;
+            font-size: 13px;
+            line-height: 1.65;
+            flex: 1;
+        }
+
+        .menu-item a {
+            display: inline-block;
+            padding: 11px 32px;
+            background: var(--blue-deep);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 13px;
+            border: 2px solid var(--blue-deep);
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .menu-item a:hover {
+            background: var(--blue-mid);
+            border-color: var(--blue-mid);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(27, 63, 114, 0.25);
+        }
+
+        /* ── Upcoming Reservations ── */
+        .upcoming-section {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-card);
+            padding: 26px 24px;
+            grid-column: 1 / -1;
+            animation: fadeInUp 0.6s ease both;
+            animation-delay: 0.3s;
+        }
+
+        .upcoming-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--blue-light);
+        }
+
+        .upcoming-header h3 {
+            color: var(--blue-deep);
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upcoming-header a {
+            font-size: 13px;
+            color: var(--blue-bright);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.15s;
+        }
+
+        .upcoming-header a:hover { color: var(--blue-deep); }
+
+        .upcoming-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+        }
+
+        .upcoming-table th {
+            background: var(--blue-deep);
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .upcoming-table th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+        .upcoming-table th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+        .upcoming-table td {
+            background: var(--blue-pale);
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--text-dark);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        .upcoming-table td:first-child {
+            border-left: 1px solid var(--border);
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+
+        .upcoming-table td:last-child {
+            border-right: 1px solid var(--border);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .upcoming-table tr:hover td { background: var(--white); }
+
+        .upcoming-table .no-data td {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--blue-pale);
+            border-radius: var(--radius-md);
+        }
+
+        /* Status badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge-confirmed { background: #e6f4ec; color: #1a7f4b; }
+        .badge-pending   { background: #fff5e0; color: #b06000; }
+        .badge-queued    { background: var(--blue-pale); color: var(--blue-deep); }
+
+        /* ── Logout modal ── */
+        .logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(27, 63, 114, 0.35);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-overlay.show { display: flex; }
+
+        .logout-modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px 40px;
+            text-align: center;
+            box-shadow: var(--shadow-hover);
+            border: 1.5px solid var(--border);
+            max-width: 360px;
+            width: 90%;
+            animation: popIn 0.25s ease both;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .logout-modal .modal-icon { font-size: 40px; margin-bottom: 14px; }
+
+        .logout-modal h3 {
+            color: var(--blue-deep);
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .logout-modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0 0 24px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            padding: 11px 28px;
+            background: var(--white);
+            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn-cancel:hover { background: var(--blue-pale); border-color: var(--blue-bright); }
+
+        .btn-logout {
+            padding: 11px 28px;
+            background: var(--blue-deep);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+        }
+
+        .btn-logout:hover { background: var(--blue-mid); transform: translateY(-1px); }
+
+        /* ── Animations ── */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .logo-card          { flex-direction: column; gap: 14px; text-align: center; }
+            .logo-card-left     { flex-direction: column; }
+            .live-datetime      { text-align: center; }
+            .stats-section      { grid-template-columns: 1fr; }
+            .dashboard-lower    { grid-template-columns: 1fr; }
+            .upcoming-section   { grid-column: auto; }
+            .header-logo        { width: 36px; height: 36px; }
+            .header-title       { font-size: 19px; }
+            .modal-buttons      { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logout confirmation modal -->
+    <div class="logout-overlay" id="logoutOverlay">
+        <div class="logout-modal">
+            <div class="modal-icon">👋</div>
+            <h3>Logging out?</h3>
+            <p>You'll need to sign back in to access the dashboard.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeLogout()">Stay</button>
+                <a href="/logout" class="btn-logout" style="text-decoration:none; display:inline-block;">Yes, Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-inner">
+            <img src="/static/logo.png" alt="CloudReserve Logo" class="header-logo">
+            <span class="header-title">CloudReserve</span>
+        </div>
+    </header>
+    <nav>
+        <a href="/reserve">Book Reservation</a>
+        <a href="/view_edit">View / Edit</a>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutOverlay').classList.add('show');">Logout</a>
+    </nav>
+
+    <main>
+        <div class="dashboard-container">
+
+            <!-- Logo + welcome + live clock -->
+            <div class="logo-card">
+                <div class="logo-card-left">
+                    <img src="/static/logo.png" alt="CloudReserve Logo">
+                    <div class="logo-card-text">
+                        <h2>Dashboard</h2>
+                        <p>Welcome back, Staff Member 👋</p>
+                    </div>
+                </div>
+                <div class="live-datetime">
+                    <div class="live-time" id="liveClock">--:--:--</div>
+                    <div class="live-date"  id="liveDate">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Stats cards -->
+            <div class="stats-section">
+                <div class="stat-card blue">
+                    <span class="stat-icon">📅</span>
+                    <div class="stat-number">{{ today_count | default(0) }}</div>
+                    <div class="stat-label">Today's Bookings</div>
+                </div>
+                <div class="stat-card green">
+                    <span class="stat-icon">👥</span>
+                    <div class="stat-number">{{ total_guests | default(0) }}</div>
+                    <div class="stat-label">Total Guests</div>
+                </div>
+                <div class="stat-card amber">
+                    <span class="stat-icon">⏳</span>
+                    <div class="stat-number">{{ pending_count | default(0) }}</div>
+                    <div class="stat-label">Pending / Queued</div>
+                </div>
+            </div>
+
+            <!-- Menu + upcoming reservations -->
+            <div class="dashboard-lower">
+
+                <div class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <h3>Book Reservation</h3>
+                    <p>Create a new reservation for your guests. Select date, time, and guest preferences.</p>
+                    <a href="/reserve">Book Now →</a>
+                </div>
+
+                <div class="menu-item">
+                    <span class="menu-icon">✏️</span>
+                    <h3>View / Edit Reservation</h3>
+                    <p>Manage existing reservations, update guest info, modify dates and times, or cancel bookings.</p>
+                    <a href="/view_edit">Manage →</a>
+                </div>
+
+                <!-- Upcoming reservations — full width -->
+                <div class="upcoming-section">
+                    <div class="upcoming-header">
+                        <h3>📆 Upcoming Reservations</h3>
+                        <a href="/view_edit">View all →</a>
+                    </div>
+                    <table class="upcoming-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Guest</th>
+                                <th>Group Size</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if upcoming_reservations and upcoming_reservations | length > 0 %}
+                                {% for r in upcoming_reservations %}
+                                <tr>
+                                    <td>{{ r.date }}</td>
+                                    <td>{{ r.time }}</td>
+                                    <td>{{ r.guest_name }}</td>
+                                    <td>{{ r.group_size }}</td>
+                                    <td>
+                                        {% if r.status == 'confirmed' %}
+                                            <span class="badge badge-confirmed">Confirmed</span>
+                                        {% elif r.status == 'queued' %}
+                                            <span class="badge badge-queued">Queued</span>
+                                        {% else %}
+                                            <span class="badge badge-pending">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr class="no-data">
+                                    <td colspan="5" style="padding: 24px;">No upcoming reservations found.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ── Live clock ── */
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const date = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('liveClock').textContent = time;
+            document.getElementById('liveDate').textContent  = date;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        /* ── Logout modal ── */
+        function closeLogout() {
+            document.getElementById('logoutOverlay').classList.remove('show');
+        }
+
+        /* Close modal on overlay click */
+        document.getElementById('logoutOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeLogout();
+        });
+
+        /* Close modal on Escape key */
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLogout();
+        });
+    </script>
+</body>
+</html>

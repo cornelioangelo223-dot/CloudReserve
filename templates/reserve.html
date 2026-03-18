@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Reservation - CloudReserve</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        main {
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+
+        /* ── Header ── */
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 16px 24px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            color: var(--white);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Active nav ── */
+        nav a.active {
+            color: var(--white);
+            background: var(--blue-deep);
+            border-color: var(--blue-deep);
+        }
+
+        /* ── Wrapper ── */
+        .booking-wrapper {
+            max-width: 720px;
+            margin: 44px auto;
+            padding: 0 20px 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .booking-title {
+            display: block;
+            text-align: center;
+            background: var(--blue-deep);
+            color: var(--white);
+            font-size: 22px;
+            font-weight: 700;
+            padding: 13px 36px;
+            border-radius: var(--radius-pill);
+            margin: 0 auto 28px;
+            width: fit-content;
+            letter-spacing: 0.3px;
+        }
+
+        .booking-container {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px 36px;
+            box-shadow: var(--shadow-card);
+            border: 1.5px solid var(--border);
+        }
+
+        /* ── Progress bar ── */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 0 10px;
+        }
+
+        .progress-step {
+            flex: 1;
+            padding: 11px 6px;
+            text-align: center;
+            border-radius: var(--radius-pill);
+            background: var(--blue-pale);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1.5px solid var(--border);
+            transition: all 0.25s ease;
+            letter-spacing: 0.2px;
+            position: relative;
+        }
+
+        .progress-step.active {
+            background: var(--blue-deep);
+            color: var(--white);
+            border-color: var(--blue-deep);
+            box-shadow: 0 4px 14px rgba(27, 63, 114, 0.22);
+        }
+
+        .progress-step.done {
+            background: #e6f4ec;
+            color: #1a7f4b;
+            border-color: #a8d9bc;
+            font-weight: 700;
+        }
+
+        /* Step counter */
+        .step-counter {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: 0.3px;
+        }
+
+        .step-counter span {
+            color: var(--blue-deep);
+            font-weight: 700;
+        }
+
+        /* ── Steps ── */
+        .step {
+            display: none;
+            animation: stepFadeIn 0.3s ease both;
+        }
+
+        .step.active { display: block !important; }
+
+        @keyframes stepFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .step h3 {
+            color: var(--blue-deep);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2.5px solid var(--blue-light);
+            position: static;
+        }
+
+        .step h3::after { content: none; display: none; }
+
+        /* ── Field groups ── */
+        .field-group {
+            margin-bottom: 4px;
+        }
+
+        .step label, main label {
+            display: block !important;
+            color: var(--text-muted) !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            margin: 16px 0 6px !important;
+        }
+
+        .step input, main input {
+            width: 100% !important;
+            padding: 12px 16px !important;
+            margin-bottom: 0 !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius-md) !important;
+            font-size: 15px !important;
+            background: var(--white) !important;
+            color: var(--text-dark) !important;
+            font-family: var(--font) !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+            outline: none !important;
+        }
+
+        .step input:focus, main input:focus {
+            border-color: var(--blue-bright) !important;
+            box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.15) !important;
+        }
+
+        .step input.input-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.12) !important;
+        }
+
+        .step input.input-ok {
+            border-color: #1a7f4b !important;
+        }
+
+        /* Inline error */
+        .field-error {
+            display: none;
+            font-size: 12px;
+            color: var(--danger);
+            font-weight: 600;
+            margin-top: 5px;
+            padding: 0 4px;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-error.show {
+            display: flex;
+        }
+
+        /* Field hint */
+        .field-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            padding: 0 4px;
+            font-weight: 500;
+        }
+
+        /* ── Buttons ── */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 26px;
+            justify-content: center;
+        }
+
+        .button-group button, main button {
+            padding: 12px 32px !important;
+            border-radius: var(--radius-pill) !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            font-family: var(--font) !important;
+            cursor: pointer !important;
+            border: none !important;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s !important;
+            letter-spacing: 0.3px !important;
+            box-shadow: none !important;
+        }
+
+        .button-group button[type="submit"],
+        .button-group button[type="button"]:last-child {
+            background: var(--blue-deep) !important;
+            color: var(--white) !important;
+        }
+
+        .button-group button[type="submit"]:hover,
+        .button-group button[type="button"]:last-child:hover {
+            background: var(--blue-mid) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 16px rgba(27, 63, 114, 0.25) !important;
+        }
+
+        .button-group button[type="button"]:first-child:not(:last-child) {
+            background: var(--white) !important;
+            color: var(--text-dark) !important;
+            border: 1.5px solid var(--border) !important;
+        }
+
+        .button-group button[type="button"]:first-child:not(:last-child):hover {
+            background: var(--blue-pale) !important;
+            border-color: var(--blue-bright) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* ── Confirmation rows ── */
+        .confirm-row {
+            background: var(--blue-pale);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin: 8px 0;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .confirm-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            width: 28px;
+            text-align: center;
+        }
+
+        .confirm-label {
+            min-width: 100px;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .confirm-value {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* ── Error banner ── */
+        .error-message {
+            background: #fff0f0;
+            color: var(--danger);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin: 20px 0 0;
+            border-left: 4px solid var(--danger);
+            border: 1px solid #f5c0c0;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message::before {
+            content: '⚠';
+            font-size: 16px;
+            color: var(--danger);
+        }
+
+        /* ── Alternative slots ── */
+        .alternative-slots {
+            margin-top: 28px;
+            padding: 24px;
+            background: #fffbf0;
+            border-radius: var(--radius-lg);
+            border: 1.5px solid #f0d080;
+        }
+
+        .alternative-slots h3 {
+            color: #a06000;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0d080;
+            text-align: left;
+        }
+
+        .alternative-slots h3::before { content: '⏰'; margin-right: 8px; }
+
+        .alternative-slots label {
+            color: #a06000 !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+
+        .alternative-slots select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #f0d080;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: var(--font);
+            background: var(--white);
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .alternative-slots select:focus {
+            border-color: #e0a020;
+            box-shadow: 0 0 0 3px rgba(224, 160, 32, 0.15);
+        }
+
+        .alternative-slots button {
+            width: 100%;
+            padding: 12px !important;
+            background: #a06000 !important;
+            color: var(--white) !important;
+            border: none !important;
+            border-radius: var(--radius-pill) !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            font-family: var(--font) !important;
+            cursor: pointer !important;
+            transition: background 0.2s, transform 0.15s !important;
+        }
+
+        .alternative-slots button:hover { background: #c07800 !important; transform: translateY(-1px) !important; }
+
+        /* ── Queue section ── */
+        .queue-section {
+            margin-top: 16px;
+            padding: 24px;
+            background: var(--blue-pale);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--border);
+        }
+
+        .queue-section h3 {
+            color: var(--blue-deep);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--blue-light);
+        }
+
+        .queue-section h3::before { content: '👥'; margin-right: 8px; }
+
+        .queue-section p {
+            background: var(--white);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        .queue-section button {
+            width: 100%;
+            padding: 12px !important;
+            background: var(--blue-deep) !important;
+            color: var(--white) !important;
+            border: none !important;
+            border-radius: var(--radius-pill) !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            font-family: var(--font) !important;
+            cursor: pointer !important;
+            transition: background 0.2s, transform 0.15s !important;
+        }
+
+        .queue-section button:hover { background: var(--blue-mid) !important; transform: translateY(-1px) !important; }
+
+        /* ── Logout modal ── */
+        .logout-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(27, 63, 114, 0.35);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-overlay.show { display: flex; }
+
+        .logout-modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px 40px;
+            text-align: center;
+            box-shadow: var(--shadow-hover);
+            border: 1.5px solid var(--border);
+            max-width: 360px;
+            width: 90%;
+            animation: popIn 0.25s ease both;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .logout-modal .modal-icon { font-size: 40px; margin-bottom: 14px; }
+
+        .logout-modal h3 {
+            color: var(--blue-deep);
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .logout-modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0 0 24px;
+        }
+
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+
+        .btn-cancel {
+            padding: 11px 28px;
+            background: var(--white);
+            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn-cancel:hover { background: var(--blue-pale); border-color: var(--blue-bright); }
+
+        .btn-logout {
+            padding: 11px 28px;
+            background: var(--blue-deep);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-logout:hover { background: var(--blue-mid); transform: translateY(-1px); }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .booking-container { padding: 22px 18px; }
+            .progress-step { font-size: 11px; padding: 9px 4px; }
+            .button-group { flex-direction: column; }
+            .button-group button { width: 100% !important; }
+            .confirm-label { min-width: 80px; }
+            .modal-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logout modal -->
+    <div class="logout-overlay" id="logoutOverlay">
+        <div class="logout-modal">
+            <div class="modal-icon">👋</div>
+            <h3>Logging out?</h3>
+            <p>You'll need to sign back in to access the system.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeLogout()">Stay</button>
+                <a href="/logout" class="btn-logout">Yes, Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-inner">
+            <img src="/static/logo.png" alt="CloudReserve Logo" class="header-logo">
+            <span class="header-title">CloudReserve</span>
+        </div>
+    </header>
+    <nav>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/reserve" class="active">Book Reservation</a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logoutOverlay').classList.add('show');">Logout</a>
+    </nav>
+
+    <main>
+        <div class="booking-wrapper">
+            <span class="booking-title">Book Reservation</span>
+
+            <div class="booking-container">
+
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-step active" id="step1-bar">Guest Info</div>
+                    <div class="progress-step"        id="step2-bar">Date & Time</div>
+                    <div class="progress-step"        id="step3-bar">Group Size</div>
+                    <div class="progress-step"        id="step4-bar">Confirm</div>
+                </div>
+
+                <!-- Step counter -->
+                <div class="step-counter" id="stepCounter">Step <span>1</span> of 4</div>
+
+                <!-- Multi-step Form -->
+                <form id="reservationForm" method="post" action="/reserve">
+
+                    <!-- Step 1: Guest Info -->
+                    <div class="step active" id="step1">
+                        <h3>Guest Information</h3>
+
+                        <div class="field-group">
+                            <label for="guest_name">Guest Name</label>
+                            <input type="text" id="guest_name" name="guest_name" placeholder="Enter full name">
+                            <div class="field-error" id="err_guest_name">⚠ Please enter the guest's name.</div>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="your@email.com">
+                            <div class="field-error" id="err_email">⚠ Please enter a valid email address.</div>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="contact">Contact Number</label>
+                            <input type="text" id="contact" name="contact" placeholder="e.g. 09171234567">
+                            <div class="field-hint">Optional — numbers only, e.g. 09xxxxxxxxx</div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" onclick="nextStep(1)">Next Step →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Date & Time -->
+                    <div class="step" id="step2">
+                        <h3>Select Date & Time</h3>
+
+                        <div class="field-group">
+                            <label for="date">Reservation Date</label>
+                            <input type="date" id="date" name="date">
+                            <div class="field-error" id="err_date">⚠ Please select a reservation date.</div>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="time">Preferred Time</label>
+                            <input type="time" id="time" name="time">
+                            <div class="field-error" id="err_time">⚠ Please select a preferred time.</div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" onclick="prevStep(2)">← Back</button>
+                            <button type="button" onclick="nextStep(2)">Next →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Group Size -->
+                    <div class="step" id="step3">
+                        <h3>Group Size</h3>
+
+                        <div class="field-group">
+                            <label for="group_size">Number of Guests</label>
+                            <input type="number" id="group_size" name="group_size" min="1" value="2">
+                            <div class="field-error" id="err_group_size">⚠ Please enter a valid group size (at least 1).</div>
+                            <div class="field-hint">Minimum 1 guest required.</div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" onclick="prevStep(3)">← Back</button>
+                            <button type="button" onclick="nextStep(3)">Review →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Confirmation -->
+                    <div class="step" id="step4">
+                        <h3>Confirm Your Reservation</h3>
+
+                        <div class="confirm-row">
+                            <span class="confirm-icon">📛</span>
+                            <span class="confirm-label">Guest Name</span>
+                            <span class="confirm-value" id="confirm_guest_name"></span>
+                        </div>
+                        <div class="confirm-row">
+                            <span class="confirm-icon">📧</span>
+                            <span class="confirm-label">Email</span>
+                            <span class="confirm-value" id="confirm_email"></span>
+                        </div>
+                        <div class="confirm-row">
+                            <span class="confirm-icon">📞</span>
+                            <span class="confirm-label">Contact</span>
+                            <span class="confirm-value" id="confirm_contact"></span>
+                        </div>
+                        <div class="confirm-row">
+                            <span class="confirm-icon">📅</span>
+                            <span class="confirm-label">Date</span>
+                            <span class="confirm-value" id="confirm_date"></span>
+                        </div>
+                        <div class="confirm-row">
+                            <span class="confirm-icon">🕐</span>
+                            <span class="confirm-label">Time</span>
+                            <span class="confirm-value" id="confirm_time"></span>
+                        </div>
+                        <div class="confirm-row">
+                            <span class="confirm-icon">👥</span>
+                            <span class="confirm-label">Group Size</span>
+                            <span class="confirm-value" id="confirm_group_size"></span>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" onclick="prevStep(4)">← Edit</button>
+                            <button type="submit">Confirm Booking</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Server-side error -->
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+
+                <!-- Alternative Slots -->
+                {% if alt_slots %}
+                <div class="alternative-slots">
+                    <h3>Alternative Time Slots Available</h3>
+                    <form method="post" action="/reserve">
+                        <input type="hidden" name="guest_name" value="{{ request.form.guest_name }}">
+                        <input type="hidden" name="email"      value="{{ request.form.email }}">
+                        <input type="hidden" name="contact"    value="{{ request.form.contact }}">
+                        <input type="hidden" name="date"       value="{{ date }}">
+                        <input type="hidden" name="group_size" value="{{ request.form.group_size }}">
+                        <label for="alt_time">Choose an available time</label>
+                        <select name="alt_time" id="alt_time">
+                            {% for t in alt_slots %}
+                                <option value="{{ t }}">{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Book Alternative Slot</button>
+                    </form>
+                </div>
+
+                <div class="queue-section">
+                    <h3>Join Waiting Queue</h3>
+                    <p>Current queue for {{ date }} at {{ time }}: <strong>{{ queue_count }} people</strong> ahead of you</p>
+                    <form method="post" action="/reserve">
+                        <input type="hidden" name="guest_name" value="{{ request.form.guest_name }}">
+                        <input type="hidden" name="email"      value="{{ request.form.email }}">
+                        <input type="hidden" name="contact"    value="{{ request.form.contact }}">
+                        <input type="hidden" name="date"       value="{{ date }}">
+                        <input type="hidden" name="time"       value="{{ time }}">
+                        <input type="hidden" name="group_size" value="{{ request.form.group_size }}">
+                        <input type="hidden" name="join_queue" value="1">
+                        <button type="submit">Join Queue</button>
+                    </form>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ── Set date minimum to today ── */
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+
+            // Ensure only step 1 is active on load
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('step' + i).classList.toggle('active', i === 1);
+            }
+            updateProgressBar(1);
+        });
+
+        /* ── Inline validation helpers ── */
+        function showError(fieldId, errorId) {
+            const input = document.getElementById(fieldId);
+            const err   = document.getElementById(errorId);
+            input.classList.add('input-error');
+            input.classList.remove('input-ok');
+            if (err) err.classList.add('show');
+        }
+
+        function clearError(fieldId, errorId) {
+            const input = document.getElementById(fieldId);
+            const err   = document.getElementById(errorId);
+            input.classList.remove('input-error');
+            input.classList.add('input-ok');
+            if (err) err.classList.remove('show');
+        }
+
+        /* Clear errors on input */
+        ['guest_name','email','contact','date','time','group_size'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', function () {
+                this.classList.remove('input-error');
+                this.classList.add('input-ok');
+                const err = document.getElementById('err_' + id);
+                if (err) err.classList.remove('show');
+            });
+        });
+
+        /* ── Step navigation ── */
+        function nextStep(step) {
+            let valid = true;
+
+            if (step === 1) {
+                const name  = document.getElementById('guest_name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+                if (!name)    { showError('guest_name', 'err_guest_name'); valid = false; }
+                else          { clearError('guest_name', 'err_guest_name'); }
+
+                if (!emailOk) { showError('email', 'err_email'); valid = false; }
+                else          { clearError('email', 'err_email'); }
+            }
+
+            if (step === 2) {
+                const date = document.getElementById('date').value;
+                const time = document.getElementById('time').value;
+
+                if (!date) { showError('date', 'err_date'); valid = false; }
+                else       { clearError('date', 'err_date'); }
+
+                if (!time) { showError('time', 'err_time'); valid = false; }
+                else       { clearError('time', 'err_time'); }
+            }
+
+            if (step === 3) {
+                const gs = parseInt(document.getElementById('group_size').value);
+                if (!gs || gs < 1) { showError('group_size', 'err_group_size'); valid = false; }
+                else               { clearError('group_size', 'err_group_size'); }
+            }
+
+            if (!valid) return;
+
+            document.getElementById('step' + step).classList.remove('active');
+            document.getElementById('step' + (step + 1)).classList.add('active');
+            updateProgressBar(step + 1);
+
+            if (step === 3) fillConfirmation();
+        }
+
+        function prevStep(step) {
+            document.getElementById('step' + step).classList.remove('active');
+            document.getElementById('step' + (step - 1)).classList.add('active');
+            updateProgressBar(step - 1);
+        }
+
+        function updateProgressBar(currentStep) {
+            for (let i = 1; i <= 4; i++) {
+                const bar = document.getElementById('step' + i + '-bar');
+                if (!bar) continue;
+                bar.classList.remove('active', 'done');
+                if (i < currentStep)      bar.classList.add('done'),   bar.textContent = '✓ ' + bar.textContent.replace('✓ ', '');
+                else if (i === currentStep) bar.classList.add('active');
+            }
+            // Update step counter
+            const counter = document.getElementById('stepCounter');
+            counter.innerHTML = 'Step <span>' + currentStep + '</span> of 4';
+        }
+
+        /* ── Fill confirmation step ── */
+        function fillConfirmation() {
+            document.getElementById('confirm_guest_name').textContent = document.getElementById('guest_name').value;
+            document.getElementById('confirm_email').textContent      = document.getElementById('email').value;
+            document.getElementById('confirm_contact').textContent    = document.getElementById('contact').value || 'Not provided';
+            document.getElementById('confirm_time').textContent       = document.getElementById('time').value;
+            document.getElementById('confirm_group_size').textContent = document.getElementById('group_size').value;
+
+            const dateStr = document.getElementById('date').value;
+            if (dateStr) {
+                const d = new Date(dateStr + 'T00:00:00');
+                document.getElementById('confirm_date').textContent = d.toLocaleDateString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                });
+            }
+        }
+
+        /* ── Logout modal ── */
+        function closeLogout() {
+            document.getElementById('logoutOverlay').classList.remove('show');
+        }
+
+        document.getElementById('logoutOverlay').addEventListener('click', function (e) {
+            if (e.target === this) closeLogout();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeLogout();
+        });
+    </script>
+</body>
+</html>
