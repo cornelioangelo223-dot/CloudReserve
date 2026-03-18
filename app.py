@@ -9,8 +9,8 @@ import os
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
 
 
-# Email configuration
-app.config['SEND_EMAILS'] = True
+ # Email configuration
+app.config['SEND_EMAILS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
