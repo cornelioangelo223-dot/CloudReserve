@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import datetime
 from flask_mail import Mail, Message
+from threading import Thread
 
 app = Flask(__name__)
 
@@ -19,12 +20,22 @@ app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 app.config['MAIL_SUPPRESS_SEND'] = False
 
-# Debug: Check if environment variables are set
-print(f"DEBUG: MAIL_USERNAME = {app.config['MAIL_USERNAME']}")
-print(f"DEBUG: MAIL_PASSWORD = {app.config['MAIL_PASSWORD']}")
-print(f"DEBUG: MAIL_DEFAULT_SENDER = {app.config['MAIL_DEFAULT_SENDER']}")
-
 mail = Mail(app)
+
+def send_async_email(msg):
+    """Send email in a background thread to avoid blocking requests."""
+    try:
+        with app.app_context():
+            mail.send(msg)
+    except Exception as e:
+        print(f'Email sending failed: {e}')
+
+def send_email(subject, recipients, body):
+    """Queue an email to be sent asynchronously."""
+    msg = Message(subject=subject, recipients=recipients, body=body)
+    thread = Thread(target=send_async_email, args=(msg,))
+    thread.daemon = True
+    thread.start()
 
 DATABASE = 'cloudreserve.db'
 
@@ -201,19 +212,15 @@ def reserve():
             )
             db.commit()
             if app.config['SEND_EMAILS']:
-                try:
-                    msg = Message(
-                        subject='CloudReserve Reservation Confirmation',
-                        recipients=[email],
-                        body=(
-                            f"Dear {guest_name},\n\n"
-                            f"Your reservation for {date} at {time} for {group_size} people has been confirmed.\n\n"
-                            f"Thank you for choosing CloudReserve!"
-                        )
+                send_email(
+                    subject='CloudReserve Reservation Confirmation',
+                    recipients=[email],
+                    body=(
+                        f"Dear {guest_name},\n\n"
+                        f"Your reservation for {date} at {time} for {group_size} people has been confirmed.\n\n"
+                        f"Thank you for choosing CloudReserve!"
                     )
-                    mail.send(msg)
-                except Exception as e:
-                    print('Email sending failed:', e)
+                )
             return render_template('confirmation.html', message='Reservation confirmed and email sent!')
     return render_template('reserve.html', error=error)
 
@@ -303,39 +310,31 @@ def edit_reservation():
             db.execute('UPDATE queue SET status = ? WHERE reservation_id = ?', ('notified', queued['id']))
             db.commit()
             if app.config['SEND_EMAILS']:
-                try:
-                    msg = Message(
-                        subject='CloudReserve Reservation Now Available',
-                        recipients=[queued['email']],
-                        body=(
-                            f"Dear {queued['guest_name']},\n\n"
-                            f"A slot for your reservation on {old_res['date']} at {old_res['time']} "
-                            f"is now available and has been confirmed for you.\n\n"
-                            f"Thank you for waiting in the queue!\n\nCloudReserve Team"
-                        )
+                send_email(
+                    subject='CloudReserve Reservation Now Available',
+                    recipients=[queued['email']],
+                    body=(
+                        f"Dear {queued['guest_name']},\n\n"
+                        f"A slot for your reservation on {old_res['date']} at {old_res['time']} "
+                        f"is now available and has been confirmed for you.\n\n"
+                        f"Thank you for waiting in the queue!\n\nCloudReserve Team"
                     )
-                    mail.send(msg)
-                except Exception as e:
-                    print('Email sending failed:', e)
+                )
     reservation = db.execute(
         'SELECT guest_name FROM reservation WHERE id = ?', (reservation_id,)
     ).fetchone()
     guest_name = reservation['guest_name'] if reservation else 'Guest'
     if app.config['SEND_EMAILS']:
-        try:
-            msg = Message(
-                subject='CloudReserve Reservation Updated',
-                recipients=[email],
-                body=(
-                    f"Dear {guest_name},\n\n"
-                    f"Your reservation has been updated.\n\n"
-                    f"New Schedule: {date} at {time} for {group_size} people.\n\n"
-                    f"Thank you for choosing CloudReserve!"
-                )
+        send_email(
+            subject='CloudReserve Reservation Updated',
+            recipients=[email],
+            body=(
+                f"Dear {guest_name},\n\n"
+                f"Your reservation has been updated.\n\n"
+                f"New Schedule: {date} at {time} for {group_size} people.\n\n"
+                f"Thank you for choosing CloudReserve!"
             )
-            mail.send(msg)
-        except Exception as e:
-            print('Email sending failed:', e)
+        )
     return render_template(
         'confirmation.html',
         message=f'Reservation updated and email sent! New schedule: {date} at {time}.'
@@ -355,21 +354,17 @@ def delete_reservation():
         date = reservation['date']
         time = reservation['time']
         if app.config['SEND_EMAILS']:
-            try:
-                msg = Message(
-                    subject='CloudReserve Reservation Cancelled',
-                    recipients=[reservation['email']],
-                    body=(
-                        f"Dear {reservation['guest_name']},\n\n"
-                        f"Your reservation for {reservation['date']} at {reservation['time']} "
-                        f"has been cancelled.\n\n"
-                        f"If this was a mistake, please contact us.\n\n"
-                        f"Thank you for choosing CloudReserve!"
-                    )
+            send_email(
+                subject='CloudReserve Reservation Cancelled',
+                recipients=[reservation['email']],
+                body=(
+                    f"Dear {reservation['guest_name']},\n\n"
+                    f"Your reservation for {reservation['date']} at {reservation['time']} "
+                    f"has been cancelled.\n\n"
+                    f"If this was a mistake, please contact us.\n\n"
+                    f"Thank you for choosing CloudReserve!"
                 )
-                mail.send(msg)
-            except Exception as e:
-                print('Email sending failed:', e)
+            )
         db.execute('DELETE FROM reservation WHERE id = ?', (reservation_id,))
         db.commit()
         queued = db.execute(
@@ -381,20 +376,16 @@ def delete_reservation():
             db.execute('UPDATE queue SET status = ? WHERE reservation_id = ?', ('notified', queued['id']))
             db.commit()
             if app.config['SEND_EMAILS']:
-                try:
-                    msg = Message(
-                        subject='CloudReserve Reservation Now Available',
-                        recipients=[queued['email']],
-                        body=(
-                            f"Dear {queued['guest_name']},\n\n"
-                            f"A slot for your reservation on {date} at {time} is now available "
-                            f"and has been confirmed for you.\n\n"
-                            f"Thank you for waiting in the queue!\n\nCloudReserve Team"
-                        )
+                send_email(
+                    subject='CloudReserve Reservation Now Available',
+                    recipients=[queued['email']],
+                    body=(
+                        f"Dear {queued['guest_name']},\n\n"
+                        f"A slot for your reservation on {date} at {time} is now available "
+                        f"and has been confirmed for you.\n\n"
+                        f"Thank you for waiting in the queue!\n\nCloudReserve Team"
                     )
-                    mail.send(msg)
-                except Exception as e:
-                    print('Email sending failed:', e)
+                )
     return render_template('confirmation.html', message='Reservation has been cancelled.')
 
 
