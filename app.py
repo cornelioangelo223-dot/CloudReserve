@@ -9,7 +9,7 @@ import os
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
 
 
- # Email configuration
+# Email configuration
 app.config['SEND_EMAILS'] = True
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -17,6 +17,12 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['MAIL_SUPPRESS_SEND'] = False
+
+# Debug: Check if environment variables are set
+print(f"DEBUG: MAIL_USERNAME = {app.config['MAIL_USERNAME']}")
+print(f"DEBUG: MAIL_PASSWORD = {app.config['MAIL_PASSWORD']}")
+print(f"DEBUG: MAIL_DEFAULT_SENDER = {app.config['MAIL_DEFAULT_SENDER']}")
 
 mail = Mail(app)
 
